@@ -1,0 +1,31 @@
+server:
+  host: "0.0.0.0"
+  port: 8837
+  log_level: "info"
+
+llm:
+  provider: "openai"
+  api_key: "${OPENAI_API_KEY}"
+  base_url: "https://api.openai.com/v1"
+  default_model: "gpt-4o"
+  max_tokens: 4096
+  temperature: 0.7
+  models:
+    - id: "gpt-4o"
+      name: "GPT-4o"
+    - id: "deepseek-chat"
+      name: "DeepSeek Chat"
+      provider: "deepseek"
+      api_key: "${DEEPSEEK_API_KEY}"
+      base_url: "https://api.deepseek.com/v1"
+
+mcp:
+  chatshell_api_url: "http://127.0.0.1:5030/mcp"
+  idle_timeout: 300
+  connect_timeout: 10
+
+auth:
+  api_key: "${BUTLER_API_KEY}"
+
+prompts:
+  directory: "prompts"
