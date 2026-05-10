@@ -1,0 +1,31 @@
+services:
+  wechat-butler:
+    build: .
+    container_name: wechat-butler
+    ports:
+      - "${SERVER_PORT:-8837}:${SERVER_PORT:-8837}"
+    env_file:
+      - .env
+    environment:
+      - SERVER_HOST=0.0.0.0
+      - SERVER_PORT=${SERVER_PORT:-8837}
+      - MCP_CHATSELL_API_URL=${MCP_CHATSELL_API_URL:-http://chatshell:5030/mcp}
+    volumes:
+      - ./config.yaml:/app/config.yaml:ro
+      - ./prompts:/app/prompts:ro
+    networks:
+      - butler-net
+    depends_on:
+      - chatshell
+    restart: unless-stopped
+
+  chatshell:
+    image: chatshell:latest
+    container_name: chatshell
+    networks:
+      - butler-net
+    restart: unless-stopped
+
+networks:
+  butler-net:
+    driver: bridge

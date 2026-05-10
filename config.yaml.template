@@ -1,0 +1,31 @@
+server:
+  host: "${SERVER_HOST}"
+  port: ${SERVER_PORT}
+  log_level: "${SERVER_LOG_LEVEL}"
+
+llm:
+  provider: "${LLM_PROVIDER}"
+  api_key: "${OPENAI_API_KEY}"
+  base_url: "${LLM_BASE_URL}"
+  default_model: "${LLM_DEFAULT_MODEL}"
+  max_tokens: ${LLM_MAX_TOKENS}
+  temperature: ${LLM_TEMPERATURE}
+  models:
+    - id: "gpt-4o"
+      name: "GPT-4o"
+    - id: "deepseek-chat"
+      name: "DeepSeek Chat"
+      provider: "deepseek"
+      api_key: "${DEEPSEEK_API_KEY}"
+      base_url: "https://api.deepseek.com/v1"
+
+mcp:
+  chatshell_api_url: "${MCP_CHATSELL_API_URL}"
+  idle_timeout: ${MCP_IDLE_TIMEOUT}
+  connect_timeout: ${MCP_CONNECT_TIMEOUT}
+
+auth:
+  api_key: "${BUTLER_API_KEY}"
+
+prompts:
+  directory: "${PROMPTS_DIRECTORY}"

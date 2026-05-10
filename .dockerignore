@@ -1,0 +1,15 @@
+.git
+__pycache__
+*.pyc
+*.pyo
+.env
+.venv
+venv
+openspec
+docs
+.sisyphus
+*.egg-info
+dist
+build
+.pytest_cache
+.mypy_cache
