@@ -10,6 +10,7 @@
 - [AI Service API 参考](api/ai-service-api.md) - v0.1.0 全部 API 端点文档
 - [技术选型与决策](features/ai-service-tech-decisions.md) - v0.1.0 技术选型理由和设计决策
 - [AI Service 快速开始](guides/ai-service-quick-start.md) - 安装、配置、启动、验证
+- [AI Service 使用指南](guides/usage-guide.md) - 完整的使用说明、API 示例、常见问题
 
 ### v0.2.0 全功能版（规划中）
 

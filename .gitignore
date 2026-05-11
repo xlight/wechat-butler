@@ -8,3 +8,4 @@ dist/
 build/
 .env
 prompts/*.yaml
+config.yaml

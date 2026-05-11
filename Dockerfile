@@ -11,6 +11,10 @@ RUN pip install --no-cache-dir --prefix=/install .
 # ---- Runtime stage ----
 FROM python:3.11-slim
 
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends curl && \
+    rm -rf /var/lib/apt/lists/*
+
 # Create non-root user
 RUN groupadd --gid 1000 butler && \
     useradd --uid 1000 --gid butler --shell /bin/bash --create-home butler
@@ -51,7 +55,7 @@ ENV SERVER_HOST=0.0.0.0 \
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:${SERVER_PORT}/health')" || exit 1
+    CMD curl -f http://localhost:${SERVER_PORT}/health || exit 1
 
 USER butler
 

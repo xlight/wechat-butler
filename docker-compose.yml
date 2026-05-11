@@ -11,7 +11,9 @@ services:
       - SERVER_PORT=${SERVER_PORT:-8837}
       - MCP_CHATSELL_API_URL=${MCP_CHATSELL_API_URL:-http://chatshell:5030/mcp}
     volumes:
-      - ./config.yaml:/app/config.yaml:ro
+      # Uncomment to mount a custom config.yaml; otherwise entrypoint.sh
+      # will fall back to config.yaml.template with env var interpolation.
+      # - ./config.yaml:/app/config.yaml:ro
       - ./prompts:/app/prompts:ro
     networks:
       - butler-net
