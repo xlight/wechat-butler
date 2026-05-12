@@ -33,8 +33,7 @@ COPY config.yaml.template config.yaml.template
 COPY entrypoint.sh entrypoint.sh
 RUN chmod +x entrypoint.sh
 
-# Copy default prompts
-COPY prompts/ prompts/
+COPY prompts/ ./prompts/
 
 # Set ownership to butler user
 RUN chown -R butler:butler /app
