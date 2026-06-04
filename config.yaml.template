@@ -27,5 +27,46 @@ mcp:
 auth:
   api_key: "${BUTLER_API_KEY}"
 
-prompts:
-  directory: "${PROMPTS_DIRECTORY}"
+agent_modes:
+  observer:
+    enabled: true
+    model: null
+    max_tokens: null
+    system_prompt: "You are a passive observer. Analyze the conversation context and surface notable points without taking action."
+  mention:
+    enabled: true
+    model: null
+    max_tokens: null
+    system_prompt: "Someone mentioned the user. Analyze the context and provide a concise, actionable response suggestion."
+  user_actions:
+    enabled: true
+    model: null
+    max_tokens: null
+    system_prompt: null
+    analyze:
+      model: null
+      max_tokens: null
+      system_prompt: "Analyze the following chat content and provide structured insights."
+    draft_reply:
+      model: null
+      max_tokens: null
+      system_prompt: "Draft a reply in the user's voice. Match tone and style of the user."
+    free_chat:
+      model: null
+      max_tokens: null
+      system_prompt: null
+
+safety:
+  forbidden_send_sessions: []
+
+rate_limiting:
+  max_concurrent: ${RATE_LIMIT_MAX_CONCURRENT}
+  max_requests_per_minute: ${RATE_LIMIT_MAX_REQUESTS_PER_MINUTE}
+  queue_timeout_seconds: ${RATE_LIMIT_QUEUE_TIMEOUT_SECONDS}
+  per_session_max_per_minute: ${RATE_LIMIT_PER_SESSION_MAX_PER_MINUTE}
+  mention:
+    max_concurrent: ${RATE_LIMIT_MENTION_MAX_CONCURRENT}
+  user_actions:
+    max_concurrent: ${RATE_LIMIT_USER_ACTIONS_MAX_CONCURRENT}
+  observer:
+    max_concurrent: ${RATE_LIMIT_OBSERVER_MAX_CONCURRENT}

@@ -1,30 +1,35 @@
-import litellm
+from wechat_butler.config import LLMConfig
 
-from wechat_butler.config import LLMConfig, mask_api_key
+
+class ModelNotFoundError(Exception):
+    pass
 
 
 class LLMRouter:
     def __init__(self, config: LLMConfig):
         self._config = config
-        self._model_map: dict[str, LLMConfig.models.__class__] = {}
-        for m in config.models:
-            self._model_map[m.id] = m
+        self._model_map: dict[str, object] = {m.id: m for m in config.models}
 
-    def resolve_model(self, model_id: str | None) -> tuple[str, str | None, str | None]:
-        model_id = model_id or self._config.default_model
-        model_cfg = self._model_map.get(model_id)
+    def resolve_model(self, model_id: str | None) -> tuple[str, str | None, str | None, str]:
+        effective_id = model_id or self._config.default_model
+        if effective_id not in self._model_map and effective_id != self._config.default_model:
+            raise ModelNotFoundError(
+                f"Model '{effective_id}' is not configured. "
+                f"Available: {sorted(self._model_map.keys())} or default '{self._config.default_model}'"
+            )
 
+        model_cfg = self._model_map.get(effective_id)
         if model_cfg:
-            provider = model_cfg.provider or self._config.provider
-            api_key = model_cfg.api_key or self._config.api_key
-            base_url = model_cfg.base_url or self._config.base_url
+            provider = getattr(model_cfg, "provider", None) or self._config.provider
+            api_key = getattr(model_cfg, "api_key", None) or self._config.api_key
+            base_url = getattr(model_cfg, "base_url", None) or self._config.base_url
         else:
             provider = self._config.provider
             api_key = self._config.api_key
             base_url = self._config.base_url
 
-        litellm_model = f"{provider}/{model_id}"
-        return litellm_model, api_key, base_url
+        litellm_model = f"{provider}/{effective_id}"
+        return litellm_model, api_key, base_url, effective_id
 
     def get_tools_schema(self, mcp_tools: list) -> list[dict]:
         tools = []

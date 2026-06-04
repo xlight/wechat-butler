@@ -27,5 +27,46 @@ mcp:
 auth:
   api_key: "${BUTLER_API_KEY}"
 
-prompts:
-  directory: "prompts"
+agent_modes:
+  observer:
+    enabled: true
+    model: null
+    max_tokens: null
+    system_prompt: null
+  mention:
+    enabled: true
+    model: null
+    max_tokens: null
+    system_prompt: null
+  user_actions:
+    enabled: true
+    model: null
+    max_tokens: null
+    system_prompt: null
+    analyze:
+      model: null
+      max_tokens: null
+      system_prompt: null
+    draft_reply:
+      model: null
+      max_tokens: null
+      system_prompt: null
+    free_chat:
+      model: null
+      max_tokens: null
+      system_prompt: null
+
+safety:
+  forbidden_send_sessions: []
+
+rate_limiting:
+  max_concurrent: 5
+  max_requests_per_minute: 10
+  queue_timeout_seconds: 30
+  per_session_max_per_minute: 5
+  mention:
+    max_concurrent: 2
+  user_actions:
+    max_concurrent: 2
+  observer:
+    max_concurrent: 1

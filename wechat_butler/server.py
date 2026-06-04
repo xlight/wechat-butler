@@ -1,17 +1,18 @@
 import logging
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from wechat_butler import __version__
-from wechat_butler.ai.chat import ChatService
-from wechat_butler.ai.prompts import PromptService
+from wechat_butler.ai.chat import OpenAIChatService
 from wechat_butler.api.ai_routes import router as ai_router
 from wechat_butler.api.middleware import APIKeyMiddleware
+from wechat_butler.api.openai_routes import router as openai_router
+from wechat_butler.api.rate_limiter import RateLimiter
 from wechat_butler.config import ConfigManager
 from wechat_butler.llm.router import LLMRouter
-from wechat_butler.mcp.client import MCPClient
+from wechat_butler.mcp_client.client import MCPClient
 
 logger = logging.getLogger(__name__)
 
@@ -46,15 +47,22 @@ def create_app(config: ConfigManager) -> FastAPI:
         connect_timeout=config.config.mcp.connect_timeout,
     )
     llm_router = LLMRouter(config.config.llm)
-    chat_service = ChatService(config.config.llm, llm_router, mcp_client, None)
-    prompt_service = PromptService(config.config.prompts.directory)
+    chat_service = OpenAIChatService(
+        llm_config=config.config.llm,
+        router=llm_router,
+        mcp=mcp_client,
+        safety=config.config.safety,
+        agent_modes=config.config.agent_modes,
+    )
+    rate_limiter = RateLimiter(config.config.rate_limiting)
 
     app.state.config = config
     app.state.mcp_client = mcp_client
     app.state.llm_router = llm_router
     app.state.chat_service = chat_service
-    app.state.prompt_service = prompt_service
+    app.state.rate_limiter = rate_limiter
 
+    app.include_router(openai_router)
     app.include_router(ai_router)
 
     app.add_middleware(APIKeyMiddleware, expected_key=config.config.auth.api_key)

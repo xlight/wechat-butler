@@ -42,8 +42,59 @@ class AuthConfig(BaseModel):
     api_key: str = ""
 
 
-class PromptsConfig(BaseModel):
-    directory: str = "prompts"
+class BaseModeConfig(BaseModel):
+    enabled: bool = True
+    model: str | None = None
+    max_tokens: int | None = None
+    system_prompt: str | None = None
+
+
+class ObserverModeConfig(BaseModeConfig):
+    pass
+
+
+class MentionModeConfig(BaseModeConfig):
+    pass
+
+
+class UserActionSubConfig(BaseModel):
+    model: str | None = None
+    max_tokens: int | None = None
+    system_prompt: str | None = None
+
+
+class UserActionsModeConfig(BaseModel):
+    enabled: bool = True
+    model: str | None = None
+    max_tokens: int | None = None
+    system_prompt: str | None = None
+    analyze: UserActionSubConfig = UserActionSubConfig()
+    draft_reply: UserActionSubConfig = UserActionSubConfig()
+    free_chat: UserActionSubConfig = UserActionSubConfig()
+
+
+class AgentModesConfig(BaseModel):
+    observer: ObserverModeConfig = ObserverModeConfig()
+    mention: MentionModeConfig = MentionModeConfig()
+    user_actions: UserActionsModeConfig = UserActionsModeConfig()
+
+
+class SafetyConfig(BaseModel):
+    forbidden_send_sessions: list[str] = []
+
+
+class RateLimitingTierConfig(BaseModel):
+    max_concurrent: int
+
+
+class RateLimitingConfig(BaseModel):
+    max_concurrent: int = 5
+    max_requests_per_minute: int = 10
+    queue_timeout_seconds: int = 30
+    per_session_max_per_minute: int = 5
+    mention: RateLimitingTierConfig = RateLimitingTierConfig(max_concurrent=2)
+    user_actions: RateLimitingTierConfig = RateLimitingTierConfig(max_concurrent=2)
+    observer: RateLimitingTierConfig = RateLimitingTierConfig(max_concurrent=1)
 
 
 class AppConfig(BaseModel):
@@ -51,7 +102,9 @@ class AppConfig(BaseModel):
     llm: LLMConfig = LLMConfig()
     mcp: MCPConfig = MCPConfig()
     auth: AuthConfig = AuthConfig()
-    prompts: PromptsConfig = PromptsConfig()
+    agent_modes: AgentModesConfig = AgentModesConfig()
+    safety: SafetyConfig = SafetyConfig()
+    rate_limiting: RateLimitingConfig = RateLimitingConfig()
 
 
 def _interpolate_env(value: str) -> str:
@@ -68,7 +121,10 @@ def _interpolate_dict(d: dict) -> dict:
         elif isinstance(v, dict):
             result[k] = _interpolate_dict(v)
         elif isinstance(v, list):
-            result[k] = [_interpolate_dict(i) if isinstance(i, dict) else _interpolate_env(i) if isinstance(i, str) else i for i in v]
+            result[k] = [
+                _interpolate_dict(i) if isinstance(i, dict) else _interpolate_env(i) if isinstance(i, str) else i
+                for i in v
+            ]
         else:
             result[k] = v
     return result
@@ -88,22 +144,6 @@ class ConfigManager:
 
     def reload(self) -> AppConfig:
         self.config = self._load()
-        return self.config
-
-    def update_llm(self, updates: dict) -> AppConfig:
-        llm = self.config.llm
-        if "provider" in updates:
-            llm.provider = updates["provider"]
-        if "api_key" in updates:
-            llm.api_key = updates["api_key"]
-        if "base_url" in updates:
-            llm.base_url = updates["base_url"]
-        if "default_model" in updates:
-            llm.default_model = updates["default_model"]
-        if "max_tokens" in updates:
-            llm.max_tokens = updates["max_tokens"]
-        if "temperature" in updates:
-            llm.temperature = updates["temperature"]
         return self.config
 
     def get_masked(self) -> dict:

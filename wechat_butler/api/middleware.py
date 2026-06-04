@@ -2,7 +2,8 @@ import logging
 
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
-from starlette.responses import JSONResponse
+
+from wechat_butler.openai_compat.errors import ErrorCode, ErrorType, error_response
 
 logger = logging.getLogger(__name__)
 
@@ -21,11 +22,26 @@ class APIKeyMiddleware(BaseHTTPMiddleware):
         if not self._expected_key:
             return await call_next(request)
 
-        api_key = request.headers.get("X-Butler-API-Key")
-        if not api_key or api_key != self._expected_key:
-            return JSONResponse(
+        provided_key = self._extract_key(request)
+        if not provided_key or provided_key != self._expected_key:
+            return error_response(
                 status_code=401,
-                content={"detail": "Invalid or missing API key"},
+                message="Invalid or missing API key",
+                error_type=ErrorType.AUTHENTICATION,
+                code=ErrorCode.INVALID_API_KEY,
             )
 
         return await call_next(request)
+
+    def _extract_key(self, request: Request) -> str | None:
+        auth_header = request.headers.get("Authorization")
+        if auth_header:
+            parts = auth_header.split(None, 1)
+            if len(parts) == 2 and parts[0].lower() == "bearer":
+                return parts[1].strip()
+
+        legacy = request.headers.get("X-Butler-API-Key") or request.headers.get("x-butler-api-key")
+        if legacy:
+            return legacy
+
+        return None
